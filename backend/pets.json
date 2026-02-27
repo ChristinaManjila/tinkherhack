@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Bella",
+    "type": "Dog",
+    "breed": "Labrador",
+    "age": 3,
+    "location": "Chennai"
+  },
+  {
+    "id": 2,
+    "name": "Milo",
+    "type": "Cat",
+    "breed": "Persian",
+    "age": 2,
+    "location": "Bangalore"
+  },
+  {
+    "id": 3,
+    "name": "Charlie",
+    "type": "Dog",
+    "breed": "Beagle",
+    "age": 4,
+    "location": "Hyderabad"
+  }
+]
