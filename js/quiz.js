@@ -13,7 +13,7 @@ function navigate(viewId) {
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     const target = document.getElementById('view-' + viewId);
     if (target) target.style.display = 'block';
-    
+
     if (viewId === 'home') renderCards(getPets(), 'home-pets-container');
     if (viewId === 'favs') renderFavorites();
     if (viewId === 'pets') renderCards(getPets(), 'pets-container');
@@ -30,7 +30,7 @@ function previewImage(event) {
     const file = event.target.files ? event.target.files[0] : event.dataTransfer.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             uploadedImageBase64 = e.target.result;
             document.getElementById('image-preview').src = uploadedImageBase64;
             document.getElementById('image-preview-container').classList.remove('d-none');
@@ -43,7 +43,7 @@ function previewImage(event) {
 function resetUpload() {
     uploadedImageBase64 = "";
     const input = document.getElementById('new-image-file');
-    if(input) input.value = "";
+    if (input) input.value = "";
     document.getElementById('image-preview-container').classList.add('d-none');
     document.getElementById('drop-zone').classList.remove('d-none');
 }
@@ -59,26 +59,32 @@ function handlePetUpload(event) {
 
     // Fix the Price formatting
     let priceValue = document.getElementById('new-cost-input').value;
-    if (!priceValue.includes('₹') && !isNaN(priceValue.replace(/\D/g,''))) {
+    if (!priceValue.includes('₹') && !isNaN(priceValue.replace(/\D/g, ''))) {
         priceValue = "₹" + priceValue;
     }
+    const currentUser = JSON.parse(localStorage.getItem('petmatch_user'));
 
-    const petData = {
-        id: isEditing ? activePetId : Date.now(),
-        isUserGenerated: true,
-        name: document.getElementById('new-name').value,
-        species: document.getElementById('new-species').value,
-        breed: document.getElementById('new-breed').value,
-        location: document.getElementById('new-location').value,
-        description: document.getElementById('new-description').value,
-        image: uploadedImageBase64,
-        cost: priceValue,
-        age: "1 Year",
-        owner: "You (Verified)",
-        size: "Medium",
-        activity: "Medium",
-        requiresYard: false
-    };
+const petData = {
+    id: isEditing ? activePetId : Date.now(),
+    isUserGenerated: true,
+    name: document.getElementById('new-name').value,
+    species: document.getElementById('new-species').value,
+    breed: document.getElementById('new-breed').value,
+    location: document.getElementById('new-location').value,
+    description: document.getElementById('new-description').value,
+    image: uploadedImageBase64,
+    cost: priceValue,
+
+    age: document.getElementById('new-age')?.value || "1 Year",
+    food: document.getElementById('new-food')?.value || "Mixed Diet",
+
+    owner: currentUser?.name || "You (Verified)",
+    phone: currentUser?.phone || "919000000000",
+
+    size: "Medium",
+    activity: "Medium",
+    requiresYard: false
+};
 
     let userPets = JSON.parse(localStorage.getItem('user_posted_pets')) || [];
 
@@ -114,7 +120,7 @@ function startEdit(petId) {
     document.getElementById('new-cost-input').value = pet.cost;
     document.getElementById('new-location').value = pet.location;
     document.getElementById('new-description').value = pet.description;
-    
+
     // Set image preview
     uploadedImageBase64 = pet.image;
     document.getElementById('image-preview').src = pet.image;
@@ -141,7 +147,7 @@ function renderCards(list, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     const favs = JSON.parse(localStorage.getItem('user_favorites')) || [];
-    
+
     container.innerHTML = list.map(pet => `
         <div class="col-md-4 mb-4">
             <div class="card h-100 position-relative">
@@ -167,49 +173,71 @@ function showPetDetails(petId) {
     activePetId = petId;
     const pet = getPets().find(p => p.id === petId);
     const modalBody = document.getElementById('modal-content-body');
-    
+
+    // fallback phone if missing
+    const phone = pet.phone || "919000000000";
+
+    const whatsappLink =
+        `https://wa.me/${phone}?text=${encodeURIComponent(
+            `Hi ${pet.owner}, I'm interested in ${pet.name} listed on PetMatch 🐾`
+        )}`;
+
+    const callLink = `tel:${phone}`;
+
     modalBody.innerHTML = `
-        <div id="profile-view">
-            <img src="${pet.image}" class="img-fluid w-100" style="height:250px; object-fit:cover;">
-            <div class="p-4">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h3 class="fw-bold mb-0">${pet.name}</h3>
-                    <span class="badge bg-success fs-6">${pet.cost}</span>
-                </div>
-                <p class="text-secondary small mb-3">${pet.description}</p>
-                <div class="row g-2 small mb-4 bg-light p-3 rounded">
-                    <div class="col-6">📍 ${pet.location}</div>
-                    <div class="col-6">👤 ${pet.owner}</div>
-                </div>
-                
-                <button class="btn btn-primary w-100 mb-2 fw-bold" onclick="openChat()">Message Owner</button>
-                
-                ${pet.isUserGenerated ? `
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-dark w-50" onclick="startEdit(${pet.id})">
-                            <i class="bi bi-pencil"></i> Edit
-                        </button>
-                        <button class="btn btn-outline-danger w-50" onclick="removeListing(${pet.id})">
-                            <i class="bi bi-trash"></i> Delete
-                        </button>
-                    </div>
-                ` : ''}
-                
-                <button class="btn btn-light w-100 mt-2" data-bs-dismiss="modal">Close</button>
-            </div>
+<div id="profile-view">
+    <img src="${pet.image}" class="img-fluid w-100" style="height:250px; object-fit:cover;">
+
+    <div class="p-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3 class="fw-bold mb-0">${pet.name}</h3>
+            <span class="badge bg-success fs-6">${pet.cost}</span>
         </div>
-        <div id="chat-view" style="display:none;" class="p-4">
-            <div class="d-flex align-items-center mb-3">
-                <button class="btn btn-sm btn-light me-2" onclick="backToProfile()"><i class="bi bi-arrow-left"></i></button>
-                <h6>Chatting about ${pet.name}</h6>
-            </div>
-            <div id="chat-box" class="mb-3 p-2 border rounded" style="height:200px; overflow-y:auto; background:#f8f9fa;"></div>
-            <div class="input-group">
-                <input type="text" id="chat-input" class="form-control" placeholder="Type a message...">
-                <button class="btn btn-primary" onclick="handleSend()"><i class="bi bi-send"></i></button>
-            </div>
+
+        <p class="text-secondary small mb-3">${pet.description}</p>
+
+        <!-- ✅ PET DETAILS -->
+        <div class="row g-2 small mb-4 bg-light p-3 rounded">
+            <div class="col-6">📍 Location: ${pet.location}</div>
+            <div class="col-6">👤 Owner: ${pet.owner}</div>
+            <div class="col-6">🐕 Breed: ${pet.breed || "Not specified"}</div>
+            <div class="col-6">🎂 Age: ${pet.age || "Not specified"}</div>
+            <div class="col-12">🍗 Preferred Food: ${pet.food || "Not specified"}</div>
         </div>
-    `;
+
+        <!-- ✅ WHATSAPP -->
+        <a href="https://wa.me/${pet.phone || "919000000000"}?text=${encodeURIComponent(
+            `Hi ${pet.owner}, I'm interested in ${pet.name} listed on PetMatch 🐾`
+        )}"
+        target="_blank"
+        class="btn btn-success w-100 mb-2 fw-bold">
+        💬 Message on WhatsApp
+        </a>
+
+        <!-- ✅ CALL -->
+        <a href="tel:${pet.phone || "919000000000"}"
+        class="btn btn-outline-primary w-100 mb-2 fw-bold">
+        📞 Call Owner
+        </a>
+
+        ${pet.isUserGenerated ? `
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-dark w-50" onclick="startEdit(${pet.id})">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-outline-danger w-50" onclick="removeListing(${pet.id})">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        ` : ''}
+
+        <button class="btn btn-light w-100 mt-2" data-bs-dismiss="modal">
+            Close
+        </button>
+    </div>
+</div>
+`;
+
     new bootstrap.Modal(document.getElementById('petModal')).show();
 }
 
@@ -264,7 +292,7 @@ function handleSend() {
 
 /** 8. INITIALIZATION **/
 document.addEventListener('DOMContentLoaded', () => {
-    updateAuthUI(); 
+    updateAuthUI();
     navigate('home');
 
     const dz = document.getElementById('drop-zone');
@@ -278,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function handleAuth(event, type) {
     event.preventDefault();
-    
+
     // For demo purposes, we'll just save a "user" object in localStorage
     const user = {
         name: type === 'signup' ? event.target.querySelector('input[type="text"]').value : "User",
@@ -287,11 +315,11 @@ function handleAuth(event, type) {
     };
 
     localStorage.setItem('petmatch_user', JSON.stringify(user));
-    
+
     // Close modal
     const authModal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
     authModal.hide();
-    
+
     updateAuthUI();
     alert(type === 'login' ? "Welcome back!" : "Account created successfully!");
 }
