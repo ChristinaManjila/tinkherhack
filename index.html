@@ -26,11 +26,14 @@
         <div class="container">
             <a class="navbar-brand fw-bold text-primary" href="#" onclick="navigate('home')">🐾 PetMatch</a>
             <div class="collapse navbar-collapse" id="nav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('home')">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('pets')">Browse</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('favs')">❤️ Favorites</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('quiz')">Quiz</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <button class="btn btn-primary px-4 shadow-sm" onclick="navigate('add-pet')">+ List a Pet</button>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -49,13 +52,11 @@
 
         <div id="view-pets" class="view">
             <div class="row mb-4 align-items-center">
-                <div class="col-md-4">
-                    <h2 class="fw-bold mb-0">Browse Pets 🐾</h2>
-                </div>
+                <div class="col-md-4"><h2 class="fw-bold mb-0">Browse Pets 🐾</h2></div>
                 <div class="col-md-5">
                     <div class="input-group shadow-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" id="pet-search" class="form-control border-start-0" placeholder="Search Kochi, Poodle, or Milo..." onkeyup="filterPets()">
+                        <input type="text" id="pet-search" class="form-control border-start-0" placeholder="Search Kochi, Poodle..." onkeyup="filterPets()">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -70,6 +71,64 @@
             </div>
             <div id="pets-container" class="row"></div>
         </div>
+        
+        <div id="view-add-pet" class="view">
+    <div class="row justify-content-center">
+        <div class="col-md-8 card p-4 shadow-lg border-0">
+            <h2 class="fw-bold mb-4 text-center">Put a Pet Up for Adoption 🏠</h2>
+            <form onsubmit="handlePetUpload(event)">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Pet Name</label>
+                        <input type="text" id="new-name" class="form-control" required placeholder="e.g. Simba">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Species</label>
+                        <select id="new-species" class="form-select">
+                            <option value="Dog">Dog</option>
+                            <option value="Cat">Cat</option>
+                            <option value="Rabbit">Rabbit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Breed</label>
+                        <input type="text" id="new-breed" class="form-control" required placeholder="e.g. Persian">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Price / Adoption Fee</label>
+                        <input type="text" id="new-cost-input" class="form-control" required placeholder="e.g. ₹2000 or Free">
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Location</label>
+                        <input type="text" id="new-location" class="form-control" required placeholder="e.g. Ernakulam, Kerala">
+                    </div>
+                    
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Pet Photo</label>
+                        <div id="drop-zone" class="border border-2 border-dashed rounded-3 p-4 text-center bg-light" 
+                             style="cursor: pointer;" onclick="document.getElementById('new-image-file').click()">
+                            <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                            <p class="mb-0">Drag & drop photo here or <strong>click to upload</strong></p>
+                            <input type="file" id="new-image-file" hidden accept="image/*" onchange="previewImage(event)">
+                        </div>
+                        <div id="image-preview-container" class="mt-2 d-none position-relative">
+                            <img id="image-preview" src="" class="img-thumbnail" style="height: 150px; width: 100%; object-fit: cover;">
+                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="resetUpload()">Remove</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea id="new-description" class="form-control" rows="3" required placeholder="Tell us about the pet..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm mt-3">Post Listing</button>
+            </form>
+        </div>
+    </div>
+</div>                 
+                     
 
         <div id="view-favs" class="view">
             <div class="d-flex justify-content-between align-items-center mb-4">
