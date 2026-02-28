@@ -264,7 +264,9 @@ function handleSend() {
 
 /** 8. INITIALIZATION **/
 document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI(); 
     navigate('home');
+
     const dz = document.getElementById('drop-zone');
     if (dz) {
         dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.style.background = "#e2e8f0"; });
@@ -272,3 +274,52 @@ document.addEventListener('DOMContentLoaded', () => {
         dz.addEventListener('drop', (e) => { e.preventDefault(); dz.style.background = "#f8fafc"; previewImage(e); });
     }
 });
+
+
+function handleAuth(event, type) {
+    event.preventDefault();
+    
+    // For demo purposes, we'll just save a "user" object in localStorage
+    const user = {
+        name: type === 'signup' ? event.target.querySelector('input[type="text"]').value : "User",
+        email: event.target.querySelector('input[type="email"]').value,
+        isLoggedIn: true
+    };
+
+    localStorage.setItem('petmatch_user', JSON.stringify(user));
+    
+    // Close modal
+    const authModal = bootstrap.Modal.getInstance(document.getElementById('authModal'));
+    authModal.hide();
+    
+    updateAuthUI();
+    alert(type === 'login' ? "Welcome back!" : "Account created successfully!");
+}
+
+function logout() {
+    localStorage.removeItem('petmatch_user');
+    updateAuthUI();
+    navigate('home');
+}
+
+function updateAuthUI() {
+    const authControls = document.getElementById('auth-controls');
+    const user = JSON.parse(localStorage.getItem('petmatch_user'));
+
+    if (user && user.isLoggedIn) {
+        authControls.innerHTML = `
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm dropdown-toggle shadow-sm" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle text-primary"></i> ${user.name}
+                </button>
+                <ul class="dropdown-menu shadow border-0">
+                    <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        `;
+    } else {
+        authControls.innerHTML = `
+            <button class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#authModal">Login</button>
+        `;
+    }
+}
